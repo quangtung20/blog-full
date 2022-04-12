@@ -9,6 +9,9 @@ import { UserRepository } from './user.repository';
 import * as bcrypt from 'bcrypt';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { CartsDto } from './dto/carts.dto';
+import { Model } from "mongoose";
+import { InjectModel } from '@nestjs/mongoose';
+import { UserDocument } from 'src/database/schemas/user.schema';
 
 @Injectable()
 export class UserService {
@@ -18,6 +21,8 @@ export class UserService {
 
     @InjectRepository(CartRepository)
     private cartRepository: CartRepository,
+
+    @InjectModel(User.name) private userModel: Model<UserDocument>
   ) { }
 
   create(createUserDto: CreateUserDto) {
@@ -103,6 +108,51 @@ export class UserService {
       return 'updated your cart';
     } catch (error) {
       throw new InternalServerErrorException(error.message);
+    }
+  }
+
+  async getUser(id) {
+    try {
+      const user = await this.userModel.findById(id);
+      console.log(user);
+      return user;
+    } catch (error) {
+      throw new InternalServerErrorException(error.message)
+    }
+  }
+
+  async resetPassword(user, password: string) {
+    if (!user) {
+      throw new BadRequestException({ msg: "Invalid Authentication." });
+    }
+
+    if (user.type !== 'register') {
+      throw new BadRequestException({
+        msg: `Quick login account with ${user.type} can't use this function.`
+      });
+    }
+    try {
+      const passwordHash = await bcrypt.hash(password, 12);
+      await this.userModel.findOneAndUpdate({ _id: user._id });
+
+    } catch (error) {
+      throw new InternalServerErrorException({ msg: error.message })
+    }
+  }
+
+  async updateUser(user, avatar: string, name: string) {
+    if (!user) {
+      throw new BadRequestException({ msg: "Invalid Authentication." });
+    }
+    try {
+      await this.userModel.findByIdAndUpdate({ _id: user._id }, {
+        avatar, name
+      })
+
+      return { msg: "Update Success!" }
+    } catch (error) {
+      console.log(error.message);
+      throw new InternalServerErrorException({ msg: error.message })
     }
   }
 }

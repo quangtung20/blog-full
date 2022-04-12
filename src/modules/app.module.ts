@@ -16,7 +16,16 @@ import { MongooseModule } from '@nestjs/mongoose';
 
 @Module({
   imports: [
-    MongooseModule.forRoot('mongodb+srv://quangtung2:123456789xx@cluster0.eysua.mongodb.net/blog-app?retryWrites=true&w=majority'),
+    // MongooseModule.forRoot('mongodb+srv://quangtung2:123456789xx@cluster0.eysua.mongodb.net/blog-app?retryWrites=true&w=majority'),
+    MongooseModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService) => {
+        return {
+          uri: `${configService.get('DB_URL')}`
+        }
+      }
+    }),
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: [`.env`],

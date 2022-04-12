@@ -146,10 +146,55 @@ export class AuthService {
     async googleLogin(id_token: string, res: Response) {
         const verify = await this.client.verifyIdToken({
             idToken: id_token,
-            audience: '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'
+            audience: '37134622493-0un7bd9qs8b0taoosv3h024cu6cujdp8.apps.googleusercontent.com'
         });
+        console.log(verify);
 
         const { email, email_verified, name, picture } = verify.getPayload();
+
+        if (!email_verified) {
+            throw new BadRequestException('Email verification failed.');
+        }
+
+        const password = email + 'google secrect password';
+        const passwordHash = await bcrypt.hash(password, 12);
+
+        const user = await this.userModel.findOne({ account: email });
+        if (user) {
+            if (user.type !== 'google') {
+                throw new BadRequestException({ msg: 'your account is register before by another method, please try different ways' })
+            }
+            return this.loginUser(user, password, res)
+        } else {
+            const user = {
+                name,
+                account: email,
+                password: passwordHash,
+                avatar: picture,
+                type: 'google'
+            }
+            return this.registerUser(user, res);
+        }
+    }
+
+    async registerUser(user: any, res: Response) {
+        await this.userModel.create(user);
+
+        const access_token = await this.jwtService.sign({ id: user._id });
+        const refresh_token = await this.jwtService.sign({ id: user._id });
+
+        res.cookie('refreshtoken', refresh_token, {
+            httpOnly: true,
+            path: `/api/refresh_token`,
+            maxAge: 30 * 24 * 60 * 60 * 1000 // 30days
+        })
+
+        res.json({
+            msg: 'Login Success!',
+            access_token,
+            user: { ...user._doc, password: '' }
+        })
+
     }
 
 }

@@ -3,7 +3,7 @@ import { CanActivate, ExecutionContext, ForbiddenException, mixin, Type, Unautho
 import JwtAuthenticationGuard from './jwt-authentication.guard';
 
 
-const RoleGuard = (role: Role): Type<CanActivate> => {
+const RoleGuard = (role: Role | string): Type<CanActivate> => {
     class RoleGuardMixin extends JwtAuthenticationGuard {
         async canActivate(context: ExecutionContext) {
             await super.canActivate(context);
@@ -11,7 +11,7 @@ const RoleGuard = (role: Role): Type<CanActivate> => {
             const request = context.switchToHttp().getRequest();
             const user = request.user;
 
-            if (user?.role >= role) {
+            if (user?.role === role || user?.role === 'admin') {
                 return true;
             } else {
                 throw new ForbiddenException('You are not alowed to do that!');

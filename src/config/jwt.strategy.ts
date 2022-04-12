@@ -6,6 +6,9 @@ import { JwtPayload } from './jwt-payload.interface';
 import { User } from '../database/entities/user.entity';
 import { AuthRepository } from '../modules/auth/auth.repository';
 import { ConfigService } from '@nestjs/config';
+import { InjectModel } from '@nestjs/mongoose';
+import { UserDocument } from 'src/database/schemas/user.schema';
+import { Model } from "mongoose";
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
@@ -13,6 +16,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     @InjectRepository(AuthRepository)
     private authRepository: AuthRepository,
     private configService: ConfigService,
+    @InjectModel(User.name) private userModel: Model<UserDocument>
   ) {
     super({
       secretOrKey: configService.get('AT_SECRET'),
@@ -20,9 +24,9 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     });
   }
 
-  async validate(payload: JwtPayload): Promise<User> {
-    const { email } = payload;
-    const user: User = await this.authRepository.findOne({ email });
+  async validate(payload: JwtPayload) {
+    const { id } = payload;
+    const user = await this.userModel.findOne({ _id: id });
 
     if (!user) {
       throw new UnauthorizedException('You are not alowed to do that!');
