@@ -22,7 +22,8 @@ import { MongooseModule } from '@nestjs/mongoose';
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => {
         return {
-          uri: `${configService.get('DB_URL')}`
+          uri: `mongodb://localhost:27017/?readPreference=primary&appname=MongoDB%20Compass&directConnection=true&ssl=false`,
+          dbName: 'blog-app'
         }
       }
     }),

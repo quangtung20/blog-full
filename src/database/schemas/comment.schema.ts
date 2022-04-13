@@ -4,7 +4,7 @@ import mongoose from "mongoose";
 import { User } from "./user.schema";
 
 @Schema({ timestamps: true })
-export class Category {
+export class Comment {
     @Prop({
         type: mongoose.Types.ObjectId, ref: User.name
     })
@@ -27,4 +27,4 @@ export class Category {
     content: string;
 }
 
-export const CategorySchema = SchemaFactory.createForClass(Category);
+export const ComentSchema = SchemaFactory.createForClass(Comment);
