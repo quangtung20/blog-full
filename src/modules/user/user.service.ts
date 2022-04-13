@@ -133,7 +133,7 @@ export class UserService {
     }
     try {
       const passwordHash = await bcrypt.hash(password, 12);
-      await this.userModel.findOneAndUpdate({ _id: user._id });
+      await this.userModel.findOneAndUpdate({ _id: user._id }, { password: passwordHash });
 
     } catch (error) {
       throw new InternalServerErrorException({ msg: error.message })

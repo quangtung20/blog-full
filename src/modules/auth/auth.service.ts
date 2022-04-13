@@ -137,7 +137,7 @@ export class AuthService {
             if (!user) throw new BadRequestException({ msg: "This account does not exist." })
 
             const access_token = this.jwtService.sign({ id: user._id })
-            return { access_token }
+            return { access_token, user }
         } catch (error) {
             throw new BadRequestException(error.message);
         }

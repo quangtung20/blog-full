@@ -56,9 +56,9 @@ import { MongooseModule } from '@nestjs/mongoose';
         }
       }
     }),
-    ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '../../', 'client/build'),
-    }),
+    // ServeStaticModule.forRoot({
+    //   rootPath: join(__dirname, '../../', 'client/build'),
+    // }),
     AuthModule,
     UserModule,
     ProductModule,
