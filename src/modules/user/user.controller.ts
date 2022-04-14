@@ -87,10 +87,4 @@ export class UserController {
     return this.userService.updateUser(user, avatar, name);
   }
 
-  @Get('haha')
-  @UseGuards(RoleGuard('user'))
-  test() {
-    console.log('hahah');
-  }
-
 }

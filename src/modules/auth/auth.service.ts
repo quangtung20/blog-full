@@ -153,7 +153,9 @@ export class AuthService {
         const { email, email_verified, name, picture } = verify.getPayload();
 
         if (!email_verified) {
-            throw new BadRequestException('Email verification failed.');
+            throw new BadRequestException({
+                msg: 'Email verification failed.'
+            });
         }
 
         const password = email + 'google secrect password';
@@ -189,12 +191,35 @@ export class AuthService {
             maxAge: 30 * 24 * 60 * 60 * 1000 // 30days
         })
 
-        res.json({
+        return ({
             msg: 'Login Success!',
             access_token,
             user: { ...user._doc, password: '' }
         })
+    }
 
+    async forgotPassword(account) {
+        try {
+            const user = await this.userModel.findOne({ account })
+            if (!user) {
+                throw new BadRequestException({ msg: 'This account does not exist.' });
+            }
+
+            if (user.type !== 'register') {
+                throw new BadRequestException({
+                    msg: `Quick login account with ${user.type} can't use this function.`
+                });
+            }
+            const access_token = await this.jwtService.sign({ id: user._id });
+
+            const url = `${this.clientUrl}/reset_password/${access_token}`;
+            sendEmail(account, url, "verify your email address");
+
+            return { msg: "Success! Please check your email." }
+
+        } catch (error) {
+            throw new InternalServerErrorException({ msg: error.message });
+        }
     }
 
 }
