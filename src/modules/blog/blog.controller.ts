@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { GetUser } from 'src/decorators/get-user.decorator';
 import RoleGuard from 'src/guards/role.guard';
 import { BlogService } from './blog.service';
@@ -44,6 +44,25 @@ export class BlogController {
     @Get('/blog/:id')
     GetBlog(@Param('id') id: string) {
         return this.blogService.getBlog(id);
+    }
+
+    @Put('/blog/:id')
+    @UseGuards(RoleGuard('user'))
+    UpdateBlog(
+        @Param('id') id: string,
+        @GetUser() user: any,
+        @Body() body: any
+    ) {
+        return this.blogService.updateBlog(user, body, id);
+    }
+
+    @Delete('/blog/:id')
+    @UseGuards(RoleGuard('user'))
+    deleteBlog(
+        @GetUser() user: any,
+        @Param('id') id: string,
+    ) {
+        return this.blogService.deleteBlog(user, id);
     }
 
 }

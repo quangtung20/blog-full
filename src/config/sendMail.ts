@@ -1,11 +1,12 @@
 import * as nodemailer from 'nodemailer';
 import { OAuth2Client } from "google-auth-library";
+import { InternalServerErrorException } from '@nestjs/common';
 
 const OAUTH_PLAYGROUND = "https://developers.google.com/oauthplayground";
 
-const CLIENT_ID = `37134622493-0un7bd9qs8b0taoosv3h024cu6cujdp8.apps.googleusercontent.com`;
-const CLIENT_SECRET = `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`;
-const REFRESH_TOKEN = `1//04VFkkQzUXfQZCgYIARAAGAQSNwF-L9IrlPNjwZU7LxlOzZ2zZ_Cvx56bslQikhXev9YJ2W9ncHAI4Dej1ad_HHadaV-TnE_7yus`;
+const CLIENT_ID = `263515861393-h7fb0qu80ps4j33r33a7nfpckvh3pdvm.apps.googleusercontent.com`;
+const CLIENT_SECRET = `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`;
+const REFRESH_TOKEN = `1//04VH82simTc8nCgYIARAAGAQSNwF-L9IrNwX2t_35JsHUlgHn9iARMlFC2Wr92k1Q0PB4GD80hlMMT2RwegJxq6m8QWJi_uC77XE`;
 const SENDER_MAIL = `katonnapro@gmail.com`;
 
 // send mail
@@ -35,7 +36,7 @@ const sendEmail = async (to: string, url: string, txt: string) => {
         const mailOptions = {
             from: SENDER_MAIL,
             to: to,
-            subject: "BlogDev",
+            subject: "QTBlog",
             html: `
               <div style="max-width: 700px; margin:auto; border: 10px solid #ddd; padding: 50px 20px; font-size: 110%;">
               <h2 style="text-align: center; text-transform: uppercase;color: teal;">Welcome to the DevAT channel.</h2>
@@ -54,8 +55,8 @@ const sendEmail = async (to: string, url: string, txt: string) => {
 
         const result = await transport.sendMail(mailOptions);
         return result;
-    } catch (err) {
-        console.log(err);
+    } catch (error) {
+        throw new InternalServerErrorException(error.message);
     }
 };
 

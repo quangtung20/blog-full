@@ -35,7 +35,6 @@ export class UserService {
 
   async findOne(_id: string): Promise<User> {
     try {
-      console.log(_id);
       const user = await this.userRepository.findOne(_id,
         { relations: ['cart', 'cart.product', 'cart.product.images'] });
       return user;
@@ -114,7 +113,6 @@ export class UserService {
   async getUser(id) {
     try {
       const user = await this.userModel.findById(id);
-      console.log(user);
       return user;
     } catch (error) {
       throw new InternalServerErrorException(error.message)
@@ -151,7 +149,6 @@ export class UserService {
 
       return { msg: "Update Success!" }
     } catch (error) {
-      console.log(error.message);
       throw new InternalServerErrorException({ msg: error.message })
     }
   }

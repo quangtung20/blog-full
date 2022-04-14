@@ -152,13 +152,11 @@ export class CommentService {
                 reply_user: new mongoose.Types.ObjectId(reply_user._id),
             })
 
-            console.log('hahaha');
 
             await this.commentModel.findOneAndUpdate({ _id: comment_root }, {
                 $push: { replyCM: newComment._id }
             });
 
-            console.log('hihihi');
 
             await newComment.save();
 

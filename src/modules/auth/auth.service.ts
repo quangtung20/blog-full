@@ -52,7 +52,6 @@ export class AuthService {
 
     async active(active_token: string) {
         try {
-            console.log(active_token);
             const decode = await this.jwtService.verify(active_token);
 
             const { newUser } = decode;
@@ -148,7 +147,6 @@ export class AuthService {
             idToken: id_token,
             audience: '37134622493-0un7bd9qs8b0taoosv3h024cu6cujdp8.apps.googleusercontent.com'
         });
-        console.log(verify);
 
         const { email, email_verified, name, picture } = verify.getPayload();
 

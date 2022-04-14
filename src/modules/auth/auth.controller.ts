@@ -51,4 +51,11 @@ export class AuthController {
         return this.authService.googleLogin(id_token, res)
     }
 
+    @Post('/forgot_password')
+    forgotPassowrd(
+        @Body('account') account: string
+    ) {
+        return this.authService.forgotPassword(account)
+    }
+
 }

@@ -3,11 +3,13 @@ import { InjectModel } from '@nestjs/mongoose';
 import mongoose from 'mongoose';
 import { Model } from "mongoose";
 import { Blog, BlogDocument } from 'src/database/schemas/blog.schema';
+import { Comment, CommentDocument } from 'src/database/schemas/comment.schema';
 
 @Injectable()
 export class BlogService {
     constructor(
-        @InjectModel(Blog.name) private blogModel: Model<BlogDocument>
+        @InjectModel(Blog.name) private blogModel: Model<BlogDocument>,
+        @InjectModel(Comment.name) private commentModel: Model<CommentDocument>
     ) { }
 
     pagination = (page, limit) => {
@@ -142,7 +144,6 @@ export class BlogService {
                 }
             ])
 
-            // console.log('get blog by category', Data)
 
             const blogs = Data[0].totalData;
             const count = Data[0].count;
@@ -210,7 +211,6 @@ export class BlogService {
                 }
             ])
 
-            console.log('get blog by user', Data);
             const blogs = Data[0].totalData;
             const count = Data[0].count;
 
@@ -238,6 +238,54 @@ export class BlogService {
                 throw new BadRequestException({ msg: "Blog does not exist." })
             }
             return blog
+
+        } catch (error) {
+            throw new InternalServerErrorException({ msg: error.message });
+        }
+    }
+
+    async updateBlog(user: any, body: any, id: string) {
+        try {
+            console.log(body);
+            const blog = await this.blogModel.findOneAndUpdate({
+                _id: id, user: user._id
+            },
+                {
+                    title: body.title,
+                    content: body.content,
+                    description: body.description,
+                    thumbnail: body.thumbnail,
+                    category: new mongoose.Types.ObjectId(body.category)
+                }
+            )
+
+            if (!blog) {
+                throw new BadRequestException({ msg: 'Invalid Authentication.' });
+            }
+
+            return { msg: 'Update Success!', blog };
+
+        } catch (error) {
+            throw new InternalServerErrorException({ msg: error.message });
+        }
+    }
+
+    async deleteBlog(user: any, id: string) {
+        try {
+            const blog = await this.blogModel.findOneAndDelete({
+                _id: id,
+                user: user._id,
+            })
+
+            if (!blog) {
+                throw new BadRequestException({ msg: 'Invalid Authentication.' });
+            }
+
+            await this.commentModel.deleteMany({
+                blog_id: blog._id
+            });
+
+            return { msg: 'Delete Success!' }
 
         } catch (error) {
             throw new InternalServerErrorException({ msg: error.message });
