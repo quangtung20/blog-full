@@ -3,6 +3,8 @@ import { Type } from "class-transformer";
 import mongoose from "mongoose";
 import { User } from "./user.schema";
 
+export type CommentDocument = Comment & Document
+
 @Schema({ timestamps: true })
 export class Comment {
     @Prop({
@@ -26,18 +28,20 @@ export class Comment {
     })
     content: string;
 
-    @Prop([{ type: mongoose.Types.ObjectId, ref: 'comment' }])
+    @Prop([{
+        type: mongoose.Types.ObjectId, ref: Comment.name
+    }])
     replyCM: [mongoose.Types.ObjectId];
 
     @Prop({
-        type: mongoose.Types.ObjectId, ref: 'user'
+        type: mongoose.Types.ObjectId, ref: User.name
     })
     reply_user: mongoose.Types.ObjectId;
 
     @Prop({
-        type: mongoose.Types.ObjectId, ref: 'comment'
+        type: mongoose.Types.ObjectId, ref: Comment.name
     })
     comment_root: mongoose.Types.ObjectId
 }
 
-export const ComentSchema = SchemaFactory.createForClass(Comment);
+export const CommentSchema = SchemaFactory.createForClass(Comment);

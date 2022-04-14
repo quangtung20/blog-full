@@ -3,10 +3,12 @@ import { InjectModel } from '@nestjs/mongoose';
 import { CategoryDocument } from 'src/database/schemas/category.schema';
 import { Model } from "mongoose";
 import mongoose from 'mongoose';
+import { Any } from 'typeorm';
+import { Comment, CommentDocument } from 'src/database/schemas/comment.schema';
 @Injectable()
 export class CommentService {
     constructor(
-        @InjectModel(Comment.name) private commentModel: Model<CategoryDocument>
+        @InjectModel(Comment.name) private commentModel: Model<CommentDocument>
     ) { }
 
     pagination = (page, limit) => {
@@ -26,8 +28,8 @@ export class CommentService {
             const newComment = await this.commentModel.create({
                 user: user._id,
                 content,
-                blog_id,
-                blog_user_id
+                blog_id: new mongoose.Types.ObjectId(blog_id),
+                blog_user_id: new mongoose.Types.ObjectId(blog_user_id)
             })
 
             return newComment;
@@ -137,5 +139,84 @@ export class CommentService {
         }
     }
 
+    async replyComment(user: any, body: any) {
+        try {
+            const { content, blog_id, blog_user_id, comment_root, reply_user } = body;
 
+            const newComment = await this.commentModel.create({
+                user: user._id,
+                content,
+                blog_id: new mongoose.Types.ObjectId(blog_id),
+                blog_user_id: new mongoose.Types.ObjectId(blog_user_id),
+                comment_root: new mongoose.Types.ObjectId(comment_root),
+                reply_user: new mongoose.Types.ObjectId(reply_user._id),
+            })
+
+            console.log('hahaha');
+
+            await this.commentModel.findOneAndUpdate({ _id: comment_root }, {
+                $push: { replyCM: newComment._id }
+            });
+
+            console.log('hihihi');
+
+            await newComment.save();
+
+            return newComment;
+        } catch (error) {
+            throw new BadRequestException({ msg: error.message });
+        }
+    }
+
+    async updateComment(user, id, content) {
+        try {
+            const comment = await this.commentModel.findOneAndUpdate(
+                {
+                    _id: id,
+                    user: user._id
+                },
+                {
+                    content
+                }
+            )
+
+            if (!comment) {
+                throw new BadRequestException({ msg: 'comment does not exist' });
+            }
+            return { msg: "Update Success!" }
+        } catch (error) {
+            throw new BadRequestException({ msg: error.message });
+        }
+    }
+
+    async deleteComment(user: any, id: string) {
+        try {
+            const comment = await this.commentModel.findOneAndDelete({
+                _id: id,
+                $or: [
+                    { user: user._id },
+                    { blog_user_id: user._id }
+                ]
+            });
+
+            if (!comment) {
+                throw new BadRequestException({ msg: 'comment does not exist' });
+            }
+
+            if (comment.comment_root) {
+                await this.commentModel.findByIdAndUpdate({
+                    _id: comment.comment_root
+                }, {
+                    $pull: { replyCM: comment._id }
+                })
+            } else {
+                await this.commentModel.deleteMany({ _id: { $in: comment.replyCM } })
+            }
+
+            return { msg: "Delete Success!" }
+
+        } catch (error) {
+            throw new BadRequestException({ msg: error.message });
+        }
+    }
 }
