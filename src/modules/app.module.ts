@@ -12,6 +12,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { MongooseModule } from '@nestjs/mongoose';
+import { BlogModule } from './blog/blog.module';
+import { CommentModule } from './comment/comment.module';
 
 
 @Module({
@@ -66,6 +68,8 @@ import { MongooseModule } from '@nestjs/mongoose';
     UploadModule,
     CartModule,
     PaymentModule,
+    BlogModule,
+    CommentModule,
   ],
 })
 export class AppModule { }

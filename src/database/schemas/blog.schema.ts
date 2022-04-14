@@ -70,7 +70,6 @@ export class Blog {
         type: String,
         require: true,
         trim: true,
-        minLength: 50,
         maxLength: 200
     })
     description: string;
